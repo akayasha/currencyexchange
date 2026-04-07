@@ -1,0 +1,908 @@
+{
+  "info": {
+    "name": "Currency Exchange API",
+    "description": "Complete REST API for currency exchange rate management and conversions",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Admin Operations",
+      "item": [
+        {
+          "name": "1. Initialize Database with Currencies & Rates",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/init-database",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "init-database"]
+            },
+            "description": "Populates the H2 database with 10 popular currencies (USD, EUR, GBP, JPY, INR, CAD, AUD, CHF, CNY, SGD) and fetches their exchange rates from open.er-api.com. Idempotent - safe to run multiple times."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Sync Exchange Rates from External API",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/sync-exchange-rates",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "sync-exchange-rates"]
+            },
+            "description": "Fetches current exchange rates from open.er-api.com for all existing currencies in the database and updates them automatically. Use this to keep rates up-to-date with live market rates. Can be called periodically (daily/hourly)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Currency Management",
+      "item": [
+        {
+          "name": "1. Get All Currencies (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/currencies?page={{page}}&size={{size}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "currencies"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}"
+                }
+              ]
+            },
+            "description": "Retrieve all currencies with pagination support"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get Currency by Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/currencies/code/{{fromCurrencyCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "currencies", "code", "{{fromCurrencyCode}}"]
+            },
+            "description": "Get currency by 3-letter ISO code (e.g., USD, EUR, GBP)"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Search Currencies with Pagination",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/currencies/search?keyword={{currencyKeyword}}&page={{page}}&size={{size}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "currencies", "search"],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "{{currencyKeyword}}"
+                },
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}"
+                }
+              ]
+            },
+            "description": "Search currencies by keyword (code, name, or region) with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Create New Currency",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{currencyCode}}\",\n  \"name\": \"{{currencyName}}\",\n  \"symbol\": \"{{currencySymbol}}\",\n  \"region\": \"{{currencyRegion}}\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/currencies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "currencies"]
+            },
+            "description": "Create a new currency. Code must be unique and exactly 3 characters."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Get Currency by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/currencies/{{currencyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "currencies", "{{currencyId}}"]
+            },
+            "description": "Get a single currency by its UUID"
+          },
+          "response": []
+        },
+        {
+          "name": "6. Update Currency",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{updateCurrencyCode}}\",\n  \"name\": \"{{updateCurrencyName}}\",\n  \"symbol\": \"{{updateCurrencySymbol}}\",\n  \"region\": \"{{updateCurrencyRegion}}\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/currencies/{{currencyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "currencies", "{{currencyId}}"]
+            },
+            "description": "Update an existing currency"
+          },
+          "response": []
+        },
+        {
+          "name": "7. Toggle Currency Status (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/currencies/{{currencyId}}?isActive={{isActive}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "currencies", "{{currencyId}}"],
+              "query": [
+                {
+                  "key": "isActive",
+                  "value": "{{isActive}}"
+                }
+              ]
+            },
+            "description": "Enable/disable a currency without changing other fields"
+          },
+          "response": []
+        },
+        {
+          "name": "8. Delete Currency",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/currencies/{{currencyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "currencies", "{{currencyId}}"]
+            },
+            "description": "Delete a currency by UUID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Exchange Rate Management",
+      "item": [
+        {
+          "name": "1. Get All Exchange Rates (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/exchange-rates?page={{page}}&size={{size}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exchange-rates"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}"
+                }
+              ]
+            },
+            "description": "Retrieve all exchange rates with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get Rate for Currency Pair",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/exchange-rates/pair?from={{fromCurrencyCode}}&to={{toCurrencyCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exchange-rates", "pair"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{fromCurrencyCode}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{toCurrencyCode}}"
+                }
+              ]
+            },
+            "description": "Get exchange rate for a specific currency pair"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Exchange Rates with Currency Details (JOIN Query)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/exchange-rates/details?from={{fromCurrencyCode}}&to={{toCurrencyCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exchange-rates", "details"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{fromCurrencyCode}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{toCurrencyCode}}"
+                }
+              ]
+            },
+            "description": "Get exchange rates with full currency details (demonstrates JOIN query across 2 tables)"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Search Exchange Rates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/exchange-rates/search?keyword={{rateKeyword}}&page={{page}}&size={{size}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exchange-rates", "search"],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "{{rateKeyword}}"
+                },
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}"
+                }
+              ]
+            },
+            "description": "Search exchange rates by currency code with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Create New Exchange Rate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromCurrencyCode\": \"{{fromCurrencyCode}}\",\n  \"toCurrencyCode\": \"{{toCurrencyCode}}\",\n  \"rate\": {{exchangeRate}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exchange-rates",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exchange-rates"]
+            },
+            "description": "Create a new exchange rate. Both currencies must exist in the database."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Get Exchange Rate by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/exchange-rates/{{exchangeRateId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exchange-rates", "{{exchangeRateId}}"]
+            },
+            "description": "Get a specific exchange rate by its UUID"
+          },
+          "response": []
+        },
+        {
+          "name": "7. Update Exchange Rate",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromCurrencyCode\": \"{{fromCurrencyCode}}\",\n  \"toCurrencyCode\": \"{{toCurrencyCode}}\",\n  \"rate\": {{updatedExchangeRate}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/exchange-rates/{{exchangeRateId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exchange-rates", "{{exchangeRateId}}"]
+            },
+            "description": "Update the rate value for an existing exchange rate"
+          },
+          "response": []
+        },
+        {
+          "name": "8. Delete Exchange Rate",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/exchange-rates/{{exchangeRateId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exchange-rates", "{{exchangeRateId}}"]
+            },
+            "description": "Delete an exchange rate by UUID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Currency Conversion (External API)",
+      "item": [
+        {
+          "name": "1. Convert Currency (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromCurrencyCode\": \"{{fromCurrencyCode}}\",\n  \"toCurrencyCode\": \"{{toCurrencyCode}}\",\n  \"amount\": {{amount}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/convert",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "convert"]
+            },
+            "description": "Convert currency amount. Checks DB first; falls back to external API (open.er-api.com) if rate not found locally."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Convert Currency (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/convert?from={{fromCurrencyCode}}&to={{toCurrencyCode}}&amount={{amount}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "convert"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{fromCurrencyCode}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{toCurrencyCode}}"
+                },
+                {
+                  "key": "amount",
+                  "value": "{{amount}}"
+                }
+              ]
+            },
+            "description": "Convert currency amount via GET endpoint. Quick conversions via query parameters."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Conversion History (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/convert/history?page={{page}}&size={{size}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "convert", "history"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}"
+                }
+              ]
+            },
+            "description": "Retrieve paginated history of currency conversions performed"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Conversion Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/convert/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "convert", "stats"]
+            },
+            "description": "Get statistics about currency conversions (total conversions, most used currencies, etc.)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Exchange Rate History",
+      "item": [
+        {
+          "name": "1. Get History for Currency Pair (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/history/pair?from={{fromCurrencyCode}}&to={{toCurrencyCode}}&page={{page}}&size={{size}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "pair"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{fromCurrencyCode}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{toCurrencyCode}}"
+                },
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}"
+                }
+              ]
+            },
+            "description": "Retrieve paginated history of rate changes for a specific currency pair"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get History for Base Currency (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/history/currency?from={{fromCurrencyCode}}&page={{page}}&size={{size}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "currency"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{fromCurrencyCode}}"
+                },
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}"
+                }
+              ]
+            },
+            "description": "Retrieve paginated history of all rate changes for a specific base currency"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get History with JOIN to Exchange Rate Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/history/pair/details?from={{fromCurrencyCode}}&to={{toCurrencyCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "pair", "details"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{fromCurrencyCode}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{toCurrencyCode}}"
+                }
+              ]
+            },
+            "description": "Retrieve history joined with current exchange rate information (demonstrates JOIN query across 2 tables)"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get History by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/history/{{historyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "{{historyId}}"]
+            },
+            "description": "Retrieve a specific history record by its UUID"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Get Most Recent History for Currency Pair",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/history/pair/latest?from={{fromCurrencyCode}}&to={{toCurrencyCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "pair", "latest"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{fromCurrencyCode}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{toCurrencyCode}}"
+                }
+              ]
+            },
+            "description": "Retrieve the most recent rate change for a specific currency pair"
+          },
+          "response": []
+        },
+        {
+          "name": "6. Get History Statistics for Currency Pair",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/history/pair/stats?from={{fromCurrencyCode}}&to={{toCurrencyCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "pair", "stats"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{fromCurrencyCode}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{toCurrencyCode}}"
+                }
+              ]
+            },
+            "description": "Retrieve statistics about the number of rate changes for a currency pair"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Documentation",
+      "item": [
+        {
+          "name": "1. Swagger UI",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/swagger-ui.html",
+              "host": ["{{baseUrl}}"],
+              "path": ["swagger-ui.html"]
+            },
+            "description": "Interactive API documentation powered by Swagger/OpenAPI"
+          },
+          "response": []
+        },
+        {
+          "name": "2. API Docs (JSON)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/v3/api-docs",
+              "host": ["{{baseUrl}}"],
+              "path": ["v3", "api-docs"]
+            },
+            "description": "OpenAPI documentation in JSON format"
+          },
+          "response": []
+        },
+        {
+          "name": "3. H2 Console",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/h2-console",
+              "host": ["{{baseUrl}}"],
+              "path": ["h2-console"]
+            },
+            "description": "H2 in-memory database console"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "page",
+      "value": "0"
+    },
+    {
+      "key": "size",
+      "value": "10"
+    },
+    {
+      "key": "fromCurrencyCode",
+      "value": "USD"
+    },
+    {
+      "key": "toCurrencyCode",
+      "value": "EUR"
+    },
+    {
+      "key": "amount",
+      "value": "100"
+    },
+    {
+      "key": "exchangeRate",
+      "value": "0.92"
+    },
+    {
+      "key": "updatedExchangeRate",
+      "value": "0.93"
+    },
+    {
+      "key": "currencyKeyword",
+      "value": "euro"
+    },
+    {
+      "key": "rateKeyword",
+      "value": "USD"
+    },
+    {
+      "key": "currencyCode",
+      "value": "USD"
+    },
+    {
+      "key": "currencyName",
+      "value": "United States Dollar"
+    },
+    {
+      "key": "currencySymbol",
+      "value": "$"
+    },
+    {
+      "key": "currencyRegion",
+      "value": "North America"
+    },
+    {
+      "key": "updateCurrencyCode",
+      "value": "EUR"
+    },
+    {
+      "key": "updateCurrencyName",
+      "value": "Euro"
+    },
+    {
+      "key": "updateCurrencySymbol",
+      "value": "€"
+    },
+    {
+      "key": "updateCurrencyRegion",
+      "value": "Europe"
+    },
+    {
+      "key": "currencyId",
+      "value": "123e4567-e89b-12d3-a456-426614174000"
+    },
+    {
+      "key": "exchangeRateId",
+      "value": "123e4567-e89b-12d3-a456-426614174000"
+    },
+    {
+      "key": "historyId",
+      "value": "123e4567-e89b-12d3-a456-426614174000"
+    },
+    {
+      "key": "isActive",
+      "value": "false"
+    }
+  ]
+}
